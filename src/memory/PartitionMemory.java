@@ -4,64 +4,56 @@ import java.util.ArrayList;
 import kernel.Process;   
 
 public class PartitionMemory {
-	private static final int PARTITION_SIZE = 16; // Fiksna velicina particije
-	private static final int TOTAL_PARTITIONS = 8; // Ukupan broj particija
+	private static final int PARTITION_SIZE = 16; 
+	private static final int TOTAL_PARTITIONS = 8;
 
 	private int[] data;
-	private int positionInMemory = -1;  // Pocetna adresa particije u memoriji
+	private int positionInMemory = -1; 
 	private Process process;
 	private boolean occupied;
 	private PartitionMemory next; 
 	private static ArrayList<PartitionMemory> allPartitions = new ArrayList<>();
 
 	
-	public static void initialize() {    // resetuje i ponovo inicijalizuje memorijske particije
-		allPartitions.clear();   // da ne ostanu stare particije iz prethodnog pokretanja
+	public static void initialize() {   
+		allPartitions.clear();  
 		for (int i = 0; i < TOTAL_PARTITIONS; i++) {
-			allPartitions.add(new PartitionMemory(i * PARTITION_SIZE));  //  odredi adresu (pocetak) svake particije
+			allPartitions.add(new PartitionMemory(i * PARTITION_SIZE));  
 		}
-	}  // memorija se dijeli na fiksne dijelove, i svaka particija ima svoju pocetnu adresu
+	}  
 
-	// Privatni konstruktor za inicijalizaciju praznih particija
 	private PartitionMemory(int position) { 
 		this.positionInMemory = position;
 		this.data = new int[PARTITION_SIZE];
 		this.occupied = false;
 	}
 
-	// Traži slobodnu particiju i dodeljuje joj proces
 	public static PartitionMemory allocatePartition(Process process) {
-	    // Provera da li proces staje u jednu particiju
 	    if (process.getSize() <= PARTITION_SIZE) {
-	        // Traži slobodnu particiju
 	        for (PartitionMemory partition : allPartitions) {
 	            if (!partition.isOccupied()) {
 	                partition.setProcess(process);
 	                partition.loadProcessData(process);
-	                partition.setOccupied(true); // Označava particiju kao zauzetu
-	                return partition; // Vraća particiju u kojoj je proces smešten
+	                partition.setOccupied(true); 
+	                return partition;
 	            }
 	        }
 	    }
-	    return null; // Nema dovoljno slobodnih particija
+	    return null; 
 	}
 
-
-	// Oslobađa particiju
 	public void freePartition() {
-	    this.process = null;  // Briše referencu na proces
-	    this.occupied = false;  // Označava particiju kao slobodnu
-	    this.data = new int[PARTITION_SIZE]; // Resetuje podatke u particiji
+	    this.process = null; 
+	    this.occupied = false; 
+	    this.data = new int[PARTITION_SIZE];
 	}
 
-	// Učitava instrukcije procesa u particiju
 	private void loadProcessData(Process process) {
-		for (int i = 0; i < Math.min(process.getInstructions().size(), PARTITION_SIZE); i++) {  // ANDJELA!!!
-			this.data[i] = Integer.parseInt(process.getInstructions().get(i), 2); // Smijesta konvertovanu vrijednost u memorijsku particiju
+		for (int i = 0; i < Math.min(process.getInstructions().size(), PARTITION_SIZE); i++) {  
+			this.data[i] = Integer.parseInt(process.getInstructions().get(i), 2); 
 		}
 	}
 
-	// Getteri i pomoćne metode
 	public static ArrayList<PartitionMemory> getAllPartitions() {
 		return allPartitions;
 	}
