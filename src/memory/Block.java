@@ -3,15 +3,14 @@ package memory;
 import java.util.Arrays;
 
 public class Block {
-    private static final int SIZE = 64;  // Fiksna veličina svakog bloka
+    private static final int SIZE = 64;
     private final byte[] content;
     private final int address;
     private boolean occupied;
 
-    // Konstruktor sada ne prima veličinu, koristi statički SIZE
     public Block(int address) {
         this.address = address;
-        this.content = new byte[SIZE];  // Fiksna veličina bloka
+        this.content = new byte[SIZE];  
         this.occupied = false;
     }
 
@@ -19,26 +18,22 @@ public class Block {
         return address;
     }
 
-    // Vraća fiksnu veličinu svakog bloka (koja je statička)
     public static int getSize() {
         return SIZE;
     }
 
-    // Vraća kopiju sadržaja bloka
     public byte[] getContent() {
-        return Arrays.copyOf(content, content.length); // Vraćamo kopiju da izbegnemo neovlašćene izmene
+        return Arrays.copyOf(content, content.length); 
     }
 
-    // Metoda za upisivanje sadržaja u blok, osigurava da se ne upiše više nego što je dozvoljeno
     public void writeContent(byte[] data) {   
-        if (data.length > SIZE) {  // Provjerava da li je data veća od dozvoljenog
+        if (data.length > SIZE) {  
             throw new IllegalArgumentException("Data exceeds block size!");
         }
         System.arraycopy(data, 0, content, 0, data.length);
         this.occupied = true;
-    } // umjesto setContent
+    } 
 
-    // Provjerava da li je blok zauzet
     public boolean isOccupied() {
         return occupied;
     }
@@ -47,7 +42,6 @@ public class Block {
     	this.occupied = occupied;
     }
 
-    // Resetuje sadržaj bloka i postavlja ga na prazno
     public void clear() {  
         Arrays.fill(content, (byte) 0);
         this.occupied = false;
