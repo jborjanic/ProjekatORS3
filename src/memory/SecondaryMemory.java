@@ -9,8 +9,8 @@ public class SecondaryMemory {
     public static ArrayList<FileInMemory> files;
 
     public SecondaryMemory() {
-        size = 2048;  // Ukupna memorija
-        numberOfBlocks = size / Block.getSize();  // Broj fiksnih blokova
+        size = 2048; 
+        numberOfBlocks = size / Block.getSize(); 
         blocks = new Block[numberOfBlocks];
         for (int i = 0; i < numberOfBlocks; i++) {
             blocks[i] = new Block(i);
@@ -21,39 +21,36 @@ public class SecondaryMemory {
     public void save(FileInMemory file) {
         int fileSize = file.getSize();
         int blockSize = Block.getSize();
-        int requiredBlocks = file.getLength(); // Koliko blokova je potrebno za fajl
+        int requiredBlocks = file.getLength(); 
 
-        // Proverava da li fajl može da stane u slobodne blokove
         int freeBlocksCount = 0;
         int firstFreeBlock = -1;
         for (int i = 0; i < blocks.length; i++) {
             if (!blocks[i].isOccupied()) {
                 freeBlocksCount++;
                 if (firstFreeBlock == -1) {
-                    firstFreeBlock = i; // Prvi slobodan blok
+                    firstFreeBlock = i; 
                 }
                 if (freeBlocksCount == requiredBlocks) {
-                    break; // Našli smo dovoljno slobodnih blokova
+                    break; 
                 }
             }
         }
 
-        // Ako nije dovoljno slobodnih blokova, vraćamo poruku
         if (freeBlocksCount < requiredBlocks) {
             System.out.println("Not enough space to save the file.");
             return;
         }
 
-        // Dodeljujemo blokove za fajl
         for (int i = firstFreeBlock, blockIndex = 0; blockIndex < requiredBlocks; i++, blockIndex++) {
             blocks[i].setOccupied(true);
-            byte[] fileData = file.part(blockIndex); // Uzimamo deo fajla
-            blocks[i].writeContent(fileData);  // Upisivanje sadržaja fajla u blok
+            byte[] fileData = file.part(blockIndex); 
+            blocks[i].writeContent(fileData);  
         }
 
-        file.setStartBlock(firstFreeBlock);  // Početni blok je sada prvi zauzeti blok
-        file.setLength(requiredBlocks);  // Dodeljujemo broj zauzetih blokova
-        files.add(file); // Dodajemo fajl u listu
+        file.setStartBlock(firstFreeBlock);  
+        file.setLength(requiredBlocks);  
+        files.add(file); 
     }
 
     public void deleteFile(FileInMemory file) {
@@ -62,16 +59,16 @@ public class SecondaryMemory {
             return;
         }
 
-        int startBlock = file.getStartBlock();  // Početni blok fajla
-        int length = file.getLength();  // Koliko blokova je zauzelo fajl
+        int startBlock = file.getStartBlock();  
+        int length = file.getLength(); 
 
-        // Brišemo blokove
+       
         for (int i = startBlock; i < startBlock + length; i++) {
             blocks[i].setOccupied(false);
-            blocks[i].writeContent(null);  // Brisanje sadržaja fajla
+            blocks[i].writeContent(null); 
         }
 
-        files.remove(file); // Uklanjamo fajl iz memorije
+        files.remove(file); 
     }
 
     public String readFile(FileInMemory file) {
@@ -79,10 +76,9 @@ public class SecondaryMemory {
             return "File not found.";
 
         StringBuilder read = new StringBuilder();
-        int startBlock = file.getStartBlock();  // Početni blok fajla
-        int length = file.getLength();  // Koliko blokova sadrži fajl
+        int startBlock = file.getStartBlock();  
+        int length = file.getLength();  
 
-        // Čitamo fajl sa svih blokova
         for (int i = startBlock, blockIndex = 0; blockIndex < length; i++, blockIndex++) {
             byte[] content = blocks[i].getContent();
             for (byte b : content) {
