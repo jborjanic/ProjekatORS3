@@ -20,13 +20,13 @@ public class ProcessScheduler extends Thread {
 	}
 
 	@Override
-	public void run() { // pokrece izvrsavanja svih procesa
+	public void run() { 
 		while (!readyQueue.isEmpty()) {
-			Process next = readyQueue.poll();  //petlja ide dok je red neprazan pa se ne moze desiti da je next = null, nema potrebe da to dodatno provjeravamo
+			Process next = readyQueue.poll(); 
 			executeProcess(next);
 			if (next.getState() != ProcessState.BLOCKED && next.getState() != ProcessState.TERMINATED && next.getState() != ProcessState.DONE) {
 				next.setState(ProcessState.READY);
-				readyQueue.add(next);  //to znaci ako se proces nije izvrsio do kraja vraca ga na kraj reda spremnih
+				readyQueue.add(next); 
 			}
 		}
 		System.out.println("There are no processes to be executed");
@@ -34,7 +34,7 @@ public class ProcessScheduler extends Thread {
 
 	private static void executeProcess(Process process) {
 		Shell.currentlyExecuting = process;
-		if (process.getPcValue() == -1) {  //znaci ako nije vec ranije pokretan
+		if (process.getPcValue() == -1) { 
 			System.out.println("Process " + process.getName() + " started to execute");
 			int startAdress = Shell.manager.loadProcess(process);
 			process.setStartAdress(startAdress);
@@ -43,19 +43,19 @@ public class ProcessScheduler extends Thread {
 			Shell.PC = 0;
 			process.setState(ProcessState.RUNNING);
 			execute(process, System.currentTimeMillis());
-		} else {   //ako je proces ranije vec izvrsavan i sad se nastavlja
+		} else {   
 			System.out.println("Process " + process.getName() + " is executing again");
 			int startAdress = Shell.manager.loadProcess(process);
 			process.setStartAdress(startAdress);
 			Shell.base = startAdress;
 			Shell.limit = process.getInstructions().size();
-			Shell.loadValues();  //ucitavamo kontekst
+			Shell.loadValues(); 
 			process.setState(ProcessState.RUNNING);
 			execute(process, System.currentTimeMillis());
 		}
 	}
 
-	private static void execute(Process process, long startTime) {  //startTime je vrijeme kada je zapoceto izvrsavanje procesa
+	private static void execute(Process process, long startTime) {  
 		while (process.getState() == ProcessState.RUNNING && System.currentTimeMillis() - startTime < timeQuantum) {
 			int temp = Ram.getAt(Shell.PC + Shell.base);
 			String instruction = Shell.fromIntToInstruction(temp);
@@ -77,7 +77,7 @@ public class ProcessScheduler extends Thread {
 			System.out.println("Process " + process.getName() + " is done");
 			MemoryManager.removeProcess(process);
 			FileSystem.createFile(process);
-		} else { // process is switched by process scheduler
+		} else { 
 			Shell.saveValues();
 		}
 		Operations.clearRegisters();
@@ -107,7 +107,7 @@ public class ProcessScheduler extends Thread {
 		System.out.println("Process with PID " + pid + " doesnt exist, check and try again");
 	}
 
-	public static void listOfProcesses() {  //ispis liste procesa
+	public static void listOfProcesses() {  
 		System.out.println("PID\tProgram\t\tSize\tState\t\tCurrent occupation of memory");
 		for (Process process : allProcesses)
 			System.out.println(process.getPid() + "\t" + process.getName() + "\t " + process.getSize() + "\t"
@@ -124,5 +124,4 @@ public class ProcessScheduler extends Thread {
 	public int getTimeQuantum() {
 		return timeQuantum;
 	}
-}
 }
