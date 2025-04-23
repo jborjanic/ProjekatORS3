@@ -1,5 +1,6 @@
 package kernel;
 
-public class ProcessState {
-
+public enum ProcessState
+{
+	READY, RUNNING, BLOCKED, TERMINATED, DONE
 }

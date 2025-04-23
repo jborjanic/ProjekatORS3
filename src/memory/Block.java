@@ -36,7 +36,24 @@ public class Block {
         }
         System.arraycopy(data, 0, content, 0, data.length);
         this.occupied = true;
-    } // umjesto setContent
+    }
+
+    // Metoda za čitanje podataka iz bloka sa proverom adresnog prostora
+    public byte readByteAt(int index) {
+        if (index < 0 || index >= SIZE) {
+            throw new IndexOutOfBoundsException("Memory access violation: invalid block address");
+        }
+        return content[index];
+    }
+
+    // Metoda za upis podataka u blok sa proverom adresnog prostora
+    public void writeByteAt(int index, byte value) {
+        if (index < 0 || index >= SIZE) {
+            throw new IndexOutOfBoundsException("Memory access violation: invalid block address");
+        }
+        content[index] = value;
+        this.occupied = true;
+    }
 
     // Provjerava da li je blok zauzet
     public boolean isOccupied() {
@@ -44,7 +61,7 @@ public class Block {
     }
     
     public void setOccupied(boolean occupied) {
-    	this.occupied = occupied;
+        this.occupied = occupied;
     }
 
     // Resetuje sadržaj bloka i postavlja ga na prazno
