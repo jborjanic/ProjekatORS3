@@ -17,7 +17,7 @@ public class Operations {
     public static final String dec = "1110";
     public static final String inc = "1111";
 
-    // Akumulator
+
     public static Register ACC = new Register("ACC", "1111", 0);
 
     public static Register R1 = new Register("R1", Constants.R1, 0);
