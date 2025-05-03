@@ -1,7 +1,7 @@
 package asembler;
-
-import kernel.ProcessState;
 import shell.Shell;
+import kernel.ProcessState;
+
 
 public class Operations {
 
@@ -18,7 +18,7 @@ public class Operations {
     public static final String inc = "1111";
 
 
-    public static Register ACC = new Register("ACC", "1111", 0);
+    public static Register ACC = new Register("ACC", "1100", 0);
 
     public static Register R1 = new Register("R1", Constants.R1, 0);
     public static Register R2 = new Register("R2", Constants.R2, 0);
@@ -85,6 +85,43 @@ public class Operations {
     public static void dec() {
         ACC.value--;
     }
+    
+    public static void jmp(String adr) {
+        int target = Integer.parseInt(adr, 2);
+        if (target >= Shell.limit) {
+            Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+            System.out.println("Invalid jump address in process: " + Shell.currentlyExecuting.getName());
+            return;
+        }
+        Shell.PC = target;
+    }
+
+    public static void jmpe(String adr) {
+        // Skok ako je ACC == 0
+        if (ACC.value == 0) {
+            int target = Integer.parseInt(adr, 2);
+            if (target >= Shell.limit) {
+                Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+                System.out.println("Invalid jmpe address in process: " + Shell.currentlyExecuting.getName());
+                return;
+            }
+            Shell.PC = target;
+        }
+    }
+
+    public static void jmpd(String adr) {
+        // Skok ako ACC != 0
+        if (ACC.value != 0) {
+            int target = Integer.parseInt(adr, 2);
+            if (target >= Shell.limit) {
+                Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+                System.out.println("Invalid jmpd address in process: " + Shell.currentlyExecuting.getName());
+                return;
+            }
+            Shell.PC = target;
+        }
+    }
+
 
     public static void clearRegisters() {
         R1.value = 0;
