@@ -4,14 +4,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
 import memory.MemoryManager;
 import shell.Shell; 
 
 public class Process {
 
 	private int pid; 
-	private String name
+	private String name;
 	private Path filePath; 
 	private ProcessState state;
 	private ArrayList<String> instructions; 

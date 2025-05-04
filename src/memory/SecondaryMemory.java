@@ -19,10 +19,9 @@ public class SecondaryMemory {
     }
 
     public void save(FileInMemory file) {
-        int fileSize = file.getSize();
-        int blockSize = Block.getSize();
         int requiredBlocks = file.getLength(); 
 
+        // Proverava da li fajl može da stane
         int freeBlocksCount = 0;
         int firstFreeBlock = -1;
         for (int i = 0; i < blocks.length; i++) {
@@ -32,7 +31,9 @@ public class SecondaryMemory {
                     firstFreeBlock = i; 
                 }
                 if (freeBlocksCount == requiredBlocks) {
-                    break; 
+
+                    break;
+
                 }
             }
         }
@@ -42,15 +43,15 @@ public class SecondaryMemory {
             return;
         }
 
+        // Dodeljujemo blokove fajlu
         for (int i = firstFreeBlock, blockIndex = 0; blockIndex < requiredBlocks; i++, blockIndex++) {
             blocks[i].setOccupied(true);
-            byte[] fileData = file.part(blockIndex); 
-            blocks[i].writeContent(fileData);  
+            blocks[i].writeContent(file.part(blockIndex));
         }
 
-        file.setStartBlock(firstFreeBlock);  
-        file.setLength(requiredBlocks);  
-        files.add(file); 
+        file.setStartBlock(firstFreeBlock);
+        file.setLength(requiredBlocks);
+        files.add(file);
     }
 
     public void deleteFile(FileInMemory file) {
@@ -59,16 +60,16 @@ public class SecondaryMemory {
             return;
         }
 
-        int startBlock = file.getStartBlock();  
-        int length = file.getLength(); 
+        int startBlock = file.getStartBlock();
+        int length = file.getLength();
 
        
         for (int i = startBlock; i < startBlock + length; i++) {
             blocks[i].setOccupied(false);
-            blocks[i].writeContent(null); 
+            blocks[i].writeContent(null);
         }
 
-        files.remove(file); 
+        files.remove(file);
     }
 
     public String readFile(FileInMemory file) {
@@ -76,10 +77,14 @@ public class SecondaryMemory {
             return "File not found.";
 
         StringBuilder read = new StringBuilder();
-        int startBlock = file.getStartBlock();  
-        int length = file.getLength();  
+        int startBlock = file.getStartBlock();
+        int length = file.getLength();
 
         for (int i = startBlock, blockIndex = 0; blockIndex < length; i++, blockIndex++) {
+            if (!isValidBlockAccess(file, blockIndex)) {
+                System.out.println("Memory access violation! Access denied.");
+                return null;
+            }
             byte[] content = blocks[i].getContent();
             for (byte b : content) {
                 read.append((char) b);
@@ -87,6 +92,14 @@ public class SecondaryMemory {
         }
 
         return read.toString();
+    }
+
+    // **ZAŠTITA ADRESNOG PROSTORA**
+    private boolean isValidBlockAccess(FileInMemory file, int blockIndex) {
+        int start = file.getStartBlock();
+        int end = start + file.getLength();
+        int blockAddress = start + blockIndex;
+        return blockAddress >= start && blockAddress < end;
     }
 
     private static int numberOfFreeBlocks() {

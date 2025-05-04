@@ -32,14 +32,23 @@ public class Block {
         }
         System.arraycopy(data, 0, content, 0, data.length);
         this.occupied = true;
-    } 
+
+    // Metoda za upis podataka u blok sa proverom adresnog prostora
+    public void writeByteAt(int index, byte value) {
+        if (index < 0 || index >= SIZE) {
+            throw new IndexOutOfBoundsException("Memory access violation: invalid block address");
+        }
+        content[index] = value;
+        this.occupied = true;
+    }
+
 
     public boolean isOccupied() {
         return occupied;
     }
     
     public void setOccupied(boolean occupied) {
-    	this.occupied = occupied;
+        this.occupied = occupied;
     }
 
     public void clear() {  

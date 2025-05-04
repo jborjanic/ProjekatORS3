@@ -2,5 +2,8 @@ package kernel;
 
 public enum ProcessState
 {
-	READY, RUNNING, BLOCKED, TERMINATED, DONE
+	READY, RUNNING, BLOCKED, TERMINATED, DONE;
+
 }
+
+

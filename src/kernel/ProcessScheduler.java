@@ -3,8 +3,7 @@ package kernel;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-
-import assembler.Operations;
+import asembler.Operations;
 import fileSystem.FileSystem;
 import memory.MemoryManager;
 import memory.Ram;
@@ -12,7 +11,7 @@ import shell.Shell;
 
 public class ProcessScheduler extends Thread {
 
-	public static Queue<Process> readyQueue = new LinkedList<>();;
+	public static Queue<Process> readyQueue = new LinkedList<>();
 	public static ArrayList<Process> allProcesses = new ArrayList<>();
 	private static int timeQuantum = 3; 
 
