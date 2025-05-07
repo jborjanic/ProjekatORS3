@@ -123,4 +123,15 @@ public class ProcessScheduler extends Thread {
 	public int getTimeQuantum() {
 		return timeQuantum;
 	}
+	
+	public static Process getProcessByPid(int pid) {
+	    for (Process process : allProcesses) {
+	        if (process.getPid() == pid) {
+	            return process;
+	        }
+	    }
+	    return null;
+	}
+	
+
 }
