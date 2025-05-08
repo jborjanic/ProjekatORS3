@@ -7,11 +7,13 @@ public class Block {
     private final byte[] content;
     private final int address;
     private boolean occupied;
-    private Block nextFree; // za ulančavanje slobodnih blokova
+
+    // 🔗 Dodato za ulančavanje slobodnih blokova
+    private Block nextFree;
 
     public Block(int address) {
         this.address = address;
-        this.content = new byte[SIZE];
+        this.content = new byte[SIZE];  
         this.occupied = false;
         this.nextFree = null;
     }
@@ -25,28 +27,28 @@ public class Block {
     }
 
     public byte[] getContent() {
-        return Arrays.copyOf(content, content.length);
+        return Arrays.copyOf(content, content.length); 
     }
 
-    public void writeContent(byte[] data) {
-        if (data != null && data.length > SIZE) {
+    public void writeContent(byte[] data) {   
+        if (data.length > SIZE) {  
             throw new IllegalArgumentException("Data exceeds block size!");
         }
-        Arrays.fill(content, (byte) 0);
-        if (data != null) {
-            System.arraycopy(data, 0, content, 0, data.length);
-            this.occupied = true;
-        } else {
-            this.occupied = false;
-        }
-    }
+        System.arraycopy(data, 0, content, 0, data.length);
+        this.occupied = true;
+    } 
 
     public boolean isOccupied() {
         return occupied;
     }
-
+    
     public void setOccupied(boolean occupied) {
         this.occupied = occupied;
+    }
+
+    public void clear() {  
+        Arrays.fill(content, (byte) 0);
+        this.occupied = false;
     }
 
     public Block getNextFree() {
@@ -57,14 +59,8 @@ public class Block {
         this.nextFree = nextFree;
     }
 
-    public void clear() {
-        Arrays.fill(content, (byte) 0);
-        this.occupied = false;
-        this.nextFree = null;
-    }
-
     @Override
     public String toString() {
-        return "Block address: " + address + ", Occupied: " + occupied;
+        return "Block address: " + address + ", Size: " + SIZE + ", Occupied: " + occupied;
     }
 }

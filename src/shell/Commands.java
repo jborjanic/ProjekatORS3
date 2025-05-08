@@ -10,6 +10,7 @@ public class Commands {
     private static String command;  
     private static ArrayList<String> commandList = new ArrayList<>(); 
     private static int iter;  //broj unijetih komandi do sada
+    private static PrintStream outStream;
 
     public static void returnCommand() {
         commandList.add(command); 
@@ -69,6 +70,21 @@ public class Commands {
                 System.out.println("That command doesn't exist!");
         }
     }
+    
+    public static void readCommand(PipedInputStream input, int length) throws IOException {
+        // Primer: samo ispiši komandu u izlaz (ovde bi išao pravi parser i izvršavanje)
+        System.out.println("Executed: " + input);
+    }
+    
+    public static String getCommand() {
+        // Za sada neka vraća dummy tekst; ili koristi ako želiš da pokažeš rezultat
+        return "Command executed.\n";
+    }
+    public static void setOut(OutputStream out) {
+        outStream = new PrintStream(out, true);
+        System.setOut(outStream); // Preusmerava System.out
+    }
+
 
     private static void errorWithParameters() {
         System.out.println("Parameters for command are incorrect!\n");

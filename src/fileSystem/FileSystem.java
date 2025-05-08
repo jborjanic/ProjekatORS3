@@ -1,74 +1,132 @@
 package fileSystem;
 
-import memory.FileInMemory;
-import memory.SecondaryMemory;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import java.util.List;
+import asembler.Operations;
+import javafx.scene.control.TreeItem;
+import kernel.Process;
+import memory.FileInMemory;
+import shell.Shell;
 
 public class FileSystem {
-    private SecondaryMemory memory;
-    private final int partitionSize;
+	private static File rootFolder;
+	private static File currentFolder;
+	private TreeItem<File> treeItem;
 
-    public FileSystem(SecondaryMemory memory) {
-        this.memory = memory;
-        this.partitionSize = memory.getNumberOfBlocks(); // koristi celu memoriju kao jednu particiju
-    }
+	public FileSystem(File path) {
+		rootFolder = path;
+		currentFolder = rootFolder;
+		treeItem = new TreeItem<>(rootFolder);
+		createTree(treeItem);
+	}
 
-    // Kreiranje i upis fajla
-    public void createFile(String name, String content) {
-        byte[] contentBytes = content.getBytes();
+	public void createTree(TreeItem<File> rootItem) {
+		try (DirectoryStream<Path> directoryStream = Files
+				.newDirectoryStream(Paths.get(rootItem.getValue().getAbsolutePath()))) {
+			for (Path path : directoryStream) {
+				TreeItem<File> newItem = new TreeItem<>(path.toFile());
+				newItem.setExpanded(false);
+				rootItem.getChildren().add(newItem);
+				if (Files.isDirectory(path))
+					createTree(newItem);
+				else { // Ucitava fajlove u sekundarnu memoriju
+					byte[] content = Files.readAllBytes(newItem.getValue().toPath());
+					FileInMemory newFile = new FileInMemory(newItem.getValue().getName(), content);
+					if (!Shell.memory.contains(newItem.getValue().getName()))
+						Shell.memory.save(newFile);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-        FileInMemory file = new FileInMemory(name, contentBytes, partitionSize);
-        memory.save(file);
-    }
+	public TreeItem<File> getTreeItem() {
+		treeItem = new TreeItem<>(currentFolder);
+		createTree(treeItem);
+		return treeItem;
+	}
 
-    // Brisanje fajla po imenu
-    public void deleteFile(String name) {
-        FileInMemory file = memory.getFile(name);
-        if (file != null) {
-            memory.deleteFile(file);
-            System.out.println("File \"" + name + "\" deleted.");
-        } else {
-            System.out.println("File \"" + name + "\" not found.");
-        }
-    }
+	public static void listFiles() {
+		System.out.println("Content of: " + currentFolder.getName());
+		System.out.println("Type\tName\t\t\tSize");
+		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+			byte[] fileContent = null;
+			try {
+				if (!file.getValue().isDirectory())
+					fileContent = Files.readAllBytes(file.getValue().toPath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			System.out.println(file.getValue().isDirectory() ? ("Folder \t" + file.getValue().getName())
+					: ("File" + "\t" + file.getValue().getName()
+							+ (file.getValue().getName().length() < 16 ? "\t\t" + fileContent.length + " B"
+									: "\t" + fileContent.length + " B")));
+		}
+	}
 
-    // Čitanje sadržaja fajla
-    public String readFile(String name) {
-        FileInMemory file = memory.getFile(name);
-        if (file != null) {
-            return memory.readFile(file);
-        } else {
-            return "File not found.";
-        }
-    }
+	public static void changeDirectory(String directory) {
+		if (directory.equals("..") && !currentFolder.equals(rootFolder))
+			currentFolder = currentFolder.getParentFile();
+		else {
+			for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+				if (file.getValue().getName().equals(directory) && file.getValue().isDirectory())
+					currentFolder = file.getValue();
+			}
+		}
+	}
 
-    // Ispis tabele alokacije fajlova
-    public void printAllocationTable() {
-        SecondaryMemory.printMemoryAllocationTable();
-    }
+	public static void makeDirectory(String directory) {
+		File folder = new File(currentFolder.getAbsolutePath() + "\\" + directory);
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
+	}
 
-    // Ispis ulančanog slobodnog prostora
-    public void printFreeBlocks() {
-        memory.printFreeList(); // trebaš implementirati u SecondaryMemory
-    }
+	public static void deleteDirectory(String directory) {
+		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+			if (file.getValue().getName().equals(directory) && file.getValue().isDirectory())
+				file.getValue().delete();
+		}
+	}
 
-    // Ispis svih fajlova u memoriji
-    public void listFiles() {
-        List<FileInMemory> files = memory.getAllFiles(); // trebaš dodati ovu metodu u SecondaryMemory
-        if (files.isEmpty()) {
-            System.out.println("No files in memory.");
-        } else {
-            System.out.println("Files in memory:");
-            for (FileInMemory file : files) {
-                System.out.println("- " + file.getName());
-            }
-        }
-    }
+	public static void renameDirectory(String old, String newName) {
+		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+			if (file.getValue().getName().equals(old) && file.getValue().isDirectory())
+				file.getValue().renameTo(new File(currentFolder.getAbsolutePath() + "\\" + newName));
+		}
+	}
 
-    // Promena "direktorijuma" — ako želiš da dodaš podršku za to, trebaš podršku za foldere
-    public void changeDirectory(String folderName) {
-        System.out.println("Simulated folders not supported in current implementation.");
-        // Možeš kasnije implementirati logiku hijerarhije ako ti bude potrebno
-    }
+	public static void createFile(Process process) {
+		String name = process.getName().substring(0, process.getName().indexOf('.')) + "_output";
+		File newFile = new File(process.getFilePath().getParent() + "\\" + name + ".txt");
+		try {
+			newFile.createNewFile();
+			FileWriter fw = new FileWriter(newFile);
+			fw.write("Rezultat izvrsavanja: " + Operations.R4.value);
+			fw.close();
+		} catch (IOException e) {
+			System.out.println("Error while creating file");
+		}
+	}
+
+	public static void deleteFile(String name) {
+		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+			if (file.getValue().getName().equals(name) && !file.getValue().isDirectory())
+				file.getValue().delete();
+			if (Shell.memory.contains(name)) {
+				Shell.memory.deleteFile(Shell.memory.getFile(name));
+			}
+		}
+	}
+
+	public File getCurrentFolder() {
+		return currentFolder;
+	}
 }
