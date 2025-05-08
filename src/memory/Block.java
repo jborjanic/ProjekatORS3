@@ -7,11 +7,13 @@ public class Block {
     private final byte[] content;
     private final int address;
     private boolean occupied;
+    private Block nextFree; // za ulančavanje slobodnih blokova
 
     public Block(int address) {
         this.address = address;
-        this.content = new byte[SIZE];  
+        this.content = new byte[SIZE];
         this.occupied = false;
+        this.nextFree = null;
     }
 
     public int getAddress() {
@@ -23,41 +25,46 @@ public class Block {
     }
 
     public byte[] getContent() {
-        return Arrays.copyOf(content, content.length); 
+        return Arrays.copyOf(content, content.length);
     }
 
-    public void writeContent(byte[] data) {   
-        if (data.length > SIZE) {  
+    public void writeContent(byte[] data) {
+        if (data != null && data.length > SIZE) {
             throw new IllegalArgumentException("Data exceeds block size!");
         }
-        System.arraycopy(data, 0, content, 0, data.length);
-        this.occupied = true;
-
-    // Metoda za upis podataka u blok sa proverom adresnog prostora
-    public void writeByteAt(int index, byte value) {
-        if (index < 0 || index >= SIZE) {
-            throw new IndexOutOfBoundsException("Memory access violation: invalid block address");
+        Arrays.fill(content, (byte) 0);
+        if (data != null) {
+            System.arraycopy(data, 0, content, 0, data.length);
+            this.occupied = true;
+        } else {
+            this.occupied = false;
         }
-        content[index] = value;
-        this.occupied = true;
     }
-
 
     public boolean isOccupied() {
         return occupied;
     }
-    
+
     public void setOccupied(boolean occupied) {
         this.occupied = occupied;
     }
 
-    public void clear() {  
+    public Block getNextFree() {
+        return nextFree;
+    }
+
+    public void setNextFree(Block nextFree) {
+        this.nextFree = nextFree;
+    }
+
+    public void clear() {
         Arrays.fill(content, (byte) 0);
         this.occupied = false;
+        this.nextFree = null;
     }
 
     @Override
     public String toString() {
-        return "Block address: " + address + ", Size: " + SIZE + ", Occupied: " + occupied;
+        return "Block address: " + address + ", Occupied: " + occupied;
     }
 }
