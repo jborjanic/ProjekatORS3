@@ -137,7 +137,7 @@ public class Process {
 				if (command.length() > 4)
 					command = command.substring(0, 4);
 			}
-			String machineInstruction = Shell.asemblerToMachineInstruction(command);
+			String machineInstruction = Shell.assemblerToMachineInstruction(command);
 			instructions.add(machineInstruction);
 		}
 	}
