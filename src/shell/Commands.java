@@ -71,12 +71,64 @@ public class Commands {
         }
     }
     
+<<<<<<< HEAD
     public static void setOut(OutputStream out) {
         outStream = new PrintStream(out, true);
         System.setOut(outStream); // Preusmerava System.out
     }
+=======
+    public static String previous() {
+		String rez = "";
+		if (!commandList.isEmpty()) {
+			if (iter >= 0) {
+				iter--;
+				if (iter <= 0)
+					iter = 0;
+				rez = commandList.get(iter);
+			}
+		}
+		return rez;
+	}
+>>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
 
+	public static String next() {
+		String rez = "";
+		if (!commandList.isEmpty())
+			if (iter < commandList.size() - 1) {
+				iter++;
+				if (iter > commandList.size() - 1)
+					iter = commandList.size() - 1;
+				rez = commandList.get(iter);
+			}
+		return rez;
+	}
 
+	public static void readACommand(PipedInputStream inp, int len) {
+		command = "";
+		char c;
+
+		for (int i = 0; i < len; i++) {
+			try {
+				c = (char) inp.read();
+				command += c;
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("Error while reading a command");
+			}
+		}
+	}
+
+	public static void setOut(OutputStream out) {
+		System.setOut(new PrintStream(out, true));
+	}
+
+	private static void errorWithParameters() {
+		String s = "Parameters for command are incorrect!\n";
+		System.out.println(s);
+	}
+}
+
+<<<<<<< HEAD
     private static void errorWithParameters() {
         System.out.println("Parameters for command are incorrect!\n");
     }
@@ -122,3 +174,5 @@ public class Commands {
 		}
 	}
 }
+=======
+>>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1

@@ -17,6 +17,11 @@ public enum ProcessState
 			return "DONE";
 		return "";
 	}
+<<<<<<< HEAD
+=======
+	
+
+>>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
 }
 
 
