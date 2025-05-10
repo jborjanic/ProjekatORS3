@@ -6,7 +6,8 @@ import kernel.ProcessState;
 public class Operations {
 
     public static final String hlt = "0000";
-    public static final String mov = "0001";
+    public static final String store = "0001";
+    public static final String load = "0110";
     public static final String add = "0010";
     public static final String sub = "0011";
     public static final String mul = "0100";
@@ -24,22 +25,23 @@ public class Operations {
     public static Register R2 = new Register("R2", Constants.R2, 0);
     public static Register R3 = new Register("R3", Constants.R3, 0);
     public static Register R4 = new Register("R4", Constants.R4, 0);
-
-    public static void mov(String operand) {
+    
+    public static void load(String operand) {
         Register r = getRegister(operand);
         if (r != null) {
-            ACC.value = r.value;
+            ACC.value = r.value;  
         } else if (operand.length() == 8) {
-            ACC.value = Integer.parseInt(operand, 2);
+            ACC.value = Integer.parseInt(operand, 2);  
         }
     }
-
-    public static void movTo(String reg) {
+    
+    public static void store(String reg) {
         Register r = getRegister(reg);
         if (r != null) {
             r.value = ACC.value;
         }
     }
+
 
     public static void add(String operand) {
         Register r = getRegister(operand);
@@ -76,6 +78,11 @@ public class Operations {
             int val = Integer.parseInt(operand, 2);
             if (val != 0) ACC.value /= val;
         }
+    }
+    
+    public static void hlt() {
+    	Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+    	
     }
 
     public static void inc() {
