@@ -1,39 +1,3 @@
-<<<<<<< HEAD
-/*package shell;
-import kernel.Process;
-=======
-package shell;
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
-
-import java.io.File;
-import asembler.Constants;
-import asembler.Operations;
-import fileSystem.FileSystem;
-import kernel.ProcessScheduler;
-import kernel.Process;
-import memory.MemoryManager;
-import memory.SecondaryMemory;
-
-public class Shell {
-    public static FileSystem tree;
-    public static MemoryManager manager;
-    public static SecondaryMemory memory;
-    public static Process currentlyExecuting = null;
-    public static int PC;
-    public static String IR;
-    public static int limit;
-    public static int base;
-
-    public static void boot() {
-        new ProcessScheduler();
-        manager = new MemoryManager();
-        memory = new SecondaryMemory();
-        tree = new FileSystem(new File("Programs"));
-    }
-
-<<<<<<< HEAD
-}*/
-
 package shell;
 
 import java.io.File;
@@ -62,8 +26,6 @@ public class Shell {
         tree = new FileSystem(new File("Programs"));
     }
 
-=======
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
     public static void executeMachineInstruction() {
         String operation = IR.substring(0, 4);
         boolean programCounterChanged = false;
@@ -71,19 +33,11 @@ public class Shell {
         if (operation.equals(Operations.hlt)) {
             Operations.hlt();
         } else if (operation.equals(Operations.load)) {
-<<<<<<< HEAD
-            String operand = IR.substring(4, 12); // 8-bitni operand
-            Operations.load(operand);
-        } else if (operation.equals(Operations.store)) {
-            String operand = IR.substring(4, 12); // 8-bitni operand
-            Operations.store(operand);    
-=======
             String operand = IR.substring(4, 12);
             Operations.load(operand);
         } else if (operation.equals(Operations.store)) {
             String operand = IR.substring(4, 12);
             Operations.store(operand);
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
         } else if (operation.equals(Operations.add)) {
             String operand = IR.substring(4, 12);
             Operations.add(operand);
@@ -104,8 +58,6 @@ public class Shell {
             String adr = IR.substring(4, 12);
             Operations.jmp(adr);
             programCounterChanged = true;
-<<<<<<< HEAD
-=======
         } else if (operation.equals(Operations.jmpe)) {
             String adr = IR.substring(4, 12);
             Operations.jmpe(adr);
@@ -114,7 +66,6 @@ public class Shell {
             String adr = IR.substring(4, 12);
             Operations.jmpd(adr);
             programCounterChanged = true;
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
         }
 
         if (!programCounterChanged) PC++;
@@ -146,11 +97,7 @@ public class Shell {
                 instruction += Operations.div + toBinary(command[1]);
                 break;
             case "INC":
-<<<<<<< HEAD
-                instruction += Operations.inc + "00000000"; // rezervisano
-=======
                 instruction += Operations.inc + "00000000";
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
                 break;
             case "DEC":
                 instruction += Operations.dec + "00000000";
@@ -158,15 +105,12 @@ public class Shell {
             case "JMP":
                 instruction += Operations.jmp + toBinary(command[1]);
                 break;
-<<<<<<< HEAD
-=======
             case "JMPE":
                 instruction += Operations.jmpe + toBinary(command[1]);
                 break;
             case "JMPD":
                 instruction += Operations.jmpd + toBinary(command[1]);
                 break;
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
         }
 
         return instruction;
@@ -207,8 +151,3 @@ public class Shell {
         PC = currentlyExecuting.getPcValue();
     }
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> c1348b79ca788e3df565672edfd4cebf722d1ee1
