@@ -6,8 +6,13 @@ import kernel.ProcessState;
 public class Operations {
 
     public static final String hlt = "0000";
+<<<<<<< HEAD
     public static final String store = "0001";
     public static final String load = "0110";
+=======
+    public static final String load = "0110";
+    public static final String store = "0001";
+>>>>>>> 95443c8 (Ažuriranje.)
     public static final String add = "0010";
     public static final String sub = "0011";
     public static final String mul = "0100";
@@ -25,7 +30,11 @@ public class Operations {
     public static Register R2 = new Register("R2", Constants.R2, 0);
     public static Register R3 = new Register("R3", Constants.R3, 0);
     public static Register R4 = new Register("R4", Constants.R4, 0);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 95443c8 (Ažuriranje.)
     public static void load(String operand) {
         Register r = getRegister(operand);
         if (r != null) {
@@ -34,7 +43,11 @@ public class Operations {
             ACC.value = Integer.parseInt(operand, 2);  
         }
     }
+<<<<<<< HEAD
     
+=======
+   
+>>>>>>> 95443c8 (Ažuriranje.)
     public static void store(String reg) {
         Register r = getRegister(reg);
         if (r != null) {
@@ -92,6 +105,10 @@ public class Operations {
     public static void dec() {
         ACC.value--;
     }
+    
+    public static void hlt() {
+		Shell.currentlyExecuting.setState(ProcessState.DONE);
+	}
     
     public static void jmp(String adr) {
         int target = Integer.parseInt(adr, 2);

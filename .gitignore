@@ -1,0 +1,11 @@
+# Ignoriši sve .class fajlove
+*.class
+
+# Ignoriši .classpath fajl (ako ti nije potreban na Git-u)
+.classpath
+
+# Ignoriši .project fajl (ako koristiš Eclipse)
+.project
+
+# Ignoriši sve fajlove u bin/ folderu
+bin/
