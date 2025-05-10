@@ -33,7 +33,7 @@ public class FileSystem {
 				TreeItem<File> newItem = new TreeItem<>(path.toFile());
 				newItem.setExpanded(false);
 				rootItem.getChildren().add(newItem);
-				if (Files.isDirectory(path))
+				if (Files.isDirectory(path))    // ako je folder
 					createTree(newItem);
 				else { // Ucitava fajlove u sekundarnu memoriju
 					byte[] content = Files.readAllBytes(newItem.getValue().toPath());

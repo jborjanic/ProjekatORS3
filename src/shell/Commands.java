@@ -71,15 +71,6 @@ public class Commands {
         }
     }
     
-    public static void readCommand(PipedInputStream input, int length) throws IOException {
-        // Primer: samo ispiši komandu u izlaz (ovde bi išao pravi parser i izvršavanje)
-        System.out.println("Executed: " + input);
-    }
-    
-    public static String getCommand() {
-        // Za sada neka vraća dummy tekst; ili koristi ako želiš da pokažeš rezultat
-        return "Command executed.\n";
-    }
     public static void setOut(OutputStream out) {
         outStream = new PrintStream(out, true);
         System.setOut(outStream); // Preusmerava System.out
@@ -89,4 +80,45 @@ public class Commands {
     private static void errorWithParameters() {
         System.out.println("Parameters for command are incorrect!\n");
     }
+    
+    
+    public static String previous() {
+		String rez = "";
+		if (!commandList.isEmpty()) {
+			if (iter >= 0) {
+				iter--;
+				if (iter <= 0)
+					iter = 0;
+				rez = commandList.get(iter);
+			}
+		}
+		return rez;
+	}
+
+	public static String next() {
+		String rez = "";
+		if (!commandList.isEmpty())
+			if (iter < commandList.size() - 1) {
+				iter++;
+				if (iter > commandList.size() - 1)
+					iter = commandList.size() - 1;
+				rez = commandList.get(iter);
+			}
+		return rez;
+	}
+
+	public static void readACommand(PipedInputStream inp, int len) {
+		command = "";
+		char c;
+
+		for (int i = 0; i < len; i++) {
+			try {
+				c = (char) inp.read();
+				command += c;
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("Error while reading a command");
+			}
+		}
+	}
 }
