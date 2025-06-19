@@ -1,7 +1,6 @@
 package memory;
 
 import java.util.ArrayList;
-import asembler.Operations;
 import kernel.Process;
 
 public class MemoryManager {
@@ -14,49 +13,34 @@ public class MemoryManager {
         partitionsInRam = new ArrayList<>();
     }
 
-    public int loadProcess(Process process) {  
-        PartitionMemory partitionMemory = PartitionMemory.getPartitionByProcess(process);
-
-        if (partitionMemory == null) {
-            partitionMemory = PartitionMemory.allocatePartition(process);
-            if (partitionMemory == null) {
-                throw new IllegalStateException("No free partitions for process " + process.getPid());
-            }
+    public int loadProcess(Process process) {
+        boolean allocated = Ram.allocateProcess(process);
+        if (!allocated) {
+            throw new IllegalStateException("No free partitions for process " + process.getPid());
         }
-
-        if (!partitionsInRam.contains(partitionMemory)) { 
+        
+        PartitionMemory partitionMemory = PartitionMemory.getPartitionByProcess(process);
+        
+        if (!partitionsInRam.contains(partitionMemory)) {
             return loadPartition(partitionMemory);
         } else {
-            return process.getStartAdress();
+            return process.getStartAddress();
         }
     }
-
+    
     public int loadPartition(PartitionMemory partition) {
-        PartitionMemory freePartition = findFreePartition();
+        if (partition != null) {
+            partition.getProcess().setStartAddress(partition.getStartAddress());
 
-        if (freePartition != null) {
-            // **ZAŠTITA ADRESNOG PROSTORA** - Provera da li proces može da pristupi ovoj particiji
-            if (!isValidMemoryAccess(partition.getProcess(), freePartition)) {
+            if (!isValidMemoryAccess(partition.getProcess(), partition)) {
                 throw new SecurityException("Memory access violation: Process " + 
                         partition.getProcess().getPid() + " tried to access unauthorized memory.");
             }
 
-
-            freePartition.setProcess(partition.getProcess());
-            freePartition.setData(partition.getData());
-            partitionsInRam.add(freePartition);
-            return freePartition.getStartAddress();
+            partitionsInRam.add(partition);
+            return partition.getStartAddress();
         }
         return -1;
-    }
-
-    private PartitionMemory findFreePartition() {
-        for (PartitionMemory partition : PartitionMemory.getAllPartitions()) {
-            if (!partition.isOccupied()) {
-                return partition;
-            }
-        }
-        return null;
     }
 
     public int[] readProcess(Process process) {
@@ -65,7 +49,7 @@ public class MemoryManager {
 
     public int[] readPartition(PartitionMemory partition) {
         if (partitionsInRam.contains(partition)) {
-            // **ZAŠTITA ADRESNOG PROSTORA** - Proverava da li proces može da čita ovu particiju
+ 
             if (!isValidMemoryAccess(partition.getProcess(), partition)) {
                 throw new SecurityException("Memory read violation: Process " + 
                         partition.getProcess().getPid() + " attempted to read unauthorized memory.");
@@ -98,17 +82,16 @@ public class MemoryManager {
 
     public static void printMemory() {
         Ram.printRAM();
-        Operations.printRegisters();
         SecondaryMemory.printMemoryAllocationTable();
     }
 
     public static ArrayList<PartitionMemory> getPartitionsInRam() {
         return partitionsInRam;
     }
-
-    // **ZAŠTITA ADRESNOG PROSTORA** - Proverava da li proces ima pravo pristupa memoriji
+    
     private boolean isValidMemoryAccess(Process process, PartitionMemory partition) {
-        return process.getStartAdress() >= partition.getStartAddress() &&
-               process.getStartAdress() + process.getSize() <= partition.getEndAddress();
+        return process.getStartAddress() >= partition.getStartAddress() &&
+               process.getStartAddress() + process.getSize() <= partition.getEndAddress();
     }
+   
 }
