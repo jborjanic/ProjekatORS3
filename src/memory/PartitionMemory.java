@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import kernel.Process;
 
 public class PartitionMemory {
-    private static final int PARTITION_SIZE = 16; // Fiksna veličina particije
-    private static final int TOTAL_PARTITIONS = 8; // Ukupan broj particija
+    private static final int PARTITION_SIZE = 16;
+    private static final int TOTAL_PARTITIONS = 8;
 
     private int[] data;
-    private int positionInMemory; // Početna adresa particije u memoriji
+    private int positionInMemory; // Pocetna adresa particije u memoriji
     private Process process;
     private boolean occupied;
     private PartitionMemory next;
     private static ArrayList<PartitionMemory> allPartitions = new ArrayList<>();
 
-    // Inicijalizacija memorijskih particija
     public static void initialize() {
         allPartitions.clear();
         for (int i = 0; i < TOTAL_PARTITIONS; i++) {
@@ -22,14 +21,12 @@ public class PartitionMemory {
         }
     }
 
-    // Privatni konstruktor za inicijalizaciju praznih particija
     private PartitionMemory(int position) {
         this.positionInMemory = position;
         this.data = new int[PARTITION_SIZE];
         this.occupied = false;
     }
 
-    // Dodeljuje proces particiji ako ima dovoljno mesta
     public static PartitionMemory allocatePartition(Process process) {
         if (process.getSize() <= PARTITION_SIZE) {
             for (PartitionMemory partition : allPartitions) {
@@ -44,26 +41,24 @@ public class PartitionMemory {
         return null;
     }
 
-    // Oslobađa particiju
     public void freePartition() {
         this.process = null;
         this.occupied = false;
         this.data = new int[PARTITION_SIZE];
     }
-
-    // Učitava instrukcije procesa u particiju
+    
     private void loadProcessData(Process process) {
+        System.out.println("[DEBUG] Loading process instructions into partition at " + positionInMemory);
         for (int i = 0; i < Math.min(process.getInstructions().size(), PARTITION_SIZE); i++) {
             this.data[i] = Integer.parseInt(process.getInstructions().get(i), 2);
+            System.out.println("Instr " + i + ": " + process.getInstructions().get(i) + " = " + this.data[i]);
         }
     }
 
-    // **ZAŠTITA ADRESNOG PROSTORA** - Proverava da li je adresa u okviru particije
     public boolean isValidMemoryAccess(int address) {
         return address >= getStartAddress() && address < getEndAddress();
     }
 
-    // **GETTERI ZA GRANICE MEMORIJE**
     public int getStartAddress() {
         return positionInMemory;
     }
@@ -72,7 +67,6 @@ public class PartitionMemory {
         return positionInMemory + PARTITION_SIZE;
     }
 
-    // Getteri i pomoćne metode
     public static ArrayList<PartitionMemory> getAllPartitions() {
         return allPartitions;
     }
