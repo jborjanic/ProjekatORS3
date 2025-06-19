@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 public class FileInMemory {
     private String name;
-    private int size; // Velicina fajla u bajtovima
-    private int startBlock; // Početni blok u memoriji
-    private int length; // Broj zauzetih blokova
-    private byte[] contentFile; // Sadržaj fajla
+    private int size; 
+    private int startBlock; 
+    private int length;
+    private byte[] contentFile;
 
     public FileInMemory(String name, byte[] content) {
         this.name = name;
@@ -16,31 +16,26 @@ public class FileInMemory {
         this.length = (int) Math.ceil((double) size / Block.getSize()); // Koliko blokova fajl zauzima
     }
 
-    // Vraća podatke u delovima (po blokovima)
-    public byte[] part(int index) {
+    public byte[] part(int index) {     // Vraca podatke u dijelovima (po blokovima)
         int blockSize = Block.getSize();
         byte[] part = new byte[blockSize];
         int startIndex = index * blockSize;
 
-        // Ako tražimo deo koji je van opsega, vraćamo prazan blok
         if (startIndex >= contentFile.length) {
-            Arrays.fill(part, (byte) ' '); // Popunjavanje praznim bajtovima
+            Arrays.fill(part, (byte) ' '); 
             return part;
         }
 
-        // Kopiramo podatke u blok
         int lengthToCopy = Math.min(blockSize, contentFile.length - startIndex);
         System.arraycopy(contentFile, startIndex, part, 0, lengthToCopy);
 
-        // Popunimo ostatak praznim bajtovima ako je potrebno
         if (lengthToCopy < blockSize) {
-            Arrays.fill(part, lengthToCopy, blockSize, (byte) ' '); // Popunjavanje ostatka bloka
+            Arrays.fill(part, lengthToCopy, blockSize, (byte) ' ');
         }
 
         return part;
     }
 
-    // Getteri i setteri
     public int getStartBlock() {
         return startBlock;
     }
@@ -51,7 +46,7 @@ public class FileInMemory {
 
     public int getLength() {
         return length;
-    } // Vrati broj blokova
+    } 
 
     public void setLength(int length) {
         this.length = length;
@@ -59,7 +54,7 @@ public class FileInMemory {
 
     public int getSize() {
         return size;
-    } // Vrati broj bajtova
+    } 
 
     public String getName() {
         return name;
