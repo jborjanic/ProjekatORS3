@@ -13,11 +13,14 @@ public class Process {
 	private String name;
 	private Path filePath; 
 	private ProcessState state;
-	private ArrayList<String> instructions; 
+	private ArrayList<String> instructions = new ArrayList<>();
 	private int size;
-	private int startAdress;
+	private int startAddress;
 	private int[] valuesOfRegisters; 
 	private int pcValue = -1;
+	private int accValue;
+	private boolean isValid = false;
+	private int resultAddress;
 
 	public Process(String program) { 
 		if (new File(Shell.tree.getCurrentFolder().getAbsolutePath() + "\\" + program).exists()) { 
@@ -25,18 +28,19 @@ public class Process {
 			state = ProcessState.READY;  
 			filePath = Paths.get(Shell.tree.getCurrentFolder().getAbsolutePath() + "\\" + program);
 			name = program;
-			valuesOfRegisters = new int[4]; 
-			instructions = new ArrayList<>(); 
+			valuesOfRegisters = new int[1]; 
 			readFile();
 			size = instructions.size();
-			System.out.println("Program " + name + " (PID = " + pid + ") is loaded and sent in the background");  
+			System.out.println("Program " + name + " (PID = " + pid + ") is loaded and sent in the background.");  
 			ProcessScheduler.allProcesses.add(this);  
 			ProcessScheduler.readyQueue.add(this);
+			isValid = true;
 		} else {
-			System.out.println("Program " + program + " doesnt exist in this directory");
+			System.out.println("Program " + program + " doesnt exist in this directory.");
+			return;
 		}
 	}
-	
+	 
 	public void block() {
 		if (this.state == ProcessState.RUNNING) { 
 			this.state = ProcessState.BLOCKED; 
@@ -48,7 +52,7 @@ public class Process {
 	public void unblock() { 
 		if (this.state == ProcessState.BLOCKED) {
 			this.state = ProcessState.READY; 
-			System.out.println("Process " + this.getName() + " is unblocked");  
+			System.out.println("Process " + this.getName() + " is unblocked.");  
 			ProcessScheduler.readyQueue.add(this);
 		}
 	}
@@ -58,12 +62,20 @@ public class Process {
 			this.state = ProcessState.TERMINATED;
 			if (ProcessScheduler.readyQueue.contains(this)) 
 				ProcessScheduler.readyQueue.remove(this);
-			System.out.println("Process " + this.getName() + " (PID " + this.getPid() + ") is terminated");
+			System.out.println("Process " + this.getName() + " (PID " + this.getPid() + ") is terminated.");
 		} else if (this.state == ProcessState.BLOCKED) { 
 			MemoryManager.removeProcess(this);  
 			this.state = ProcessState.TERMINATED; 
-			System.out.println("Process " + this.getName() + " (PID " + this.getPid() + ") is terminated");
+			System.out.println("Process " + this.getName() + " (PID " + this.getPid() + ") is terminated.");
 		}
+	}
+	
+	public void setResultAddress(int address) {
+	    this.resultAddress = address;
+	}
+
+	public int getResultAddress() {
+	    return resultAddress;
 	}
 
 	public int getPid() {
@@ -103,17 +115,21 @@ public class Process {
 		this.pcValue = pcValue;
 	}
 
-	public int getStartAdress() {
-		return startAdress;
+	public int getStartAddress() {
+		return startAddress;
 	}
 
-	public void setStartAdress(int startAdress) {
-		this.startAdress = startAdress;
+	public void setStartAddress(int startAdress) {
+		this.startAddress = startAdress;
 	}
-
+	
 	public ArrayList<String> getInstructions() {
-		return instructions;
+	    if (instructions == null) {
+	        instructions = new ArrayList<>();
+	    }
+	    return instructions;
 	}
+
 
 	public void setInstructions(ArrayList<String> instructions) {
 		this.instructions = instructions;
@@ -122,24 +138,37 @@ public class Process {
 	public int getSize() {
 		return size;
 	}
+	
+	public int getAccValue() {
+	    return accValue;
+	}
+
+	public void setAccValue(int accValue) {
+	    this.accValue = accValue;
+	}
+
 
 	public void setSize(int size) {
 		this.size = size;
 	}
 
 	public void readFile() { 
-		String content = Shell.memory.readFile(Shell.memory.getFile(name));
-		String[] commands = content.split("\\n");
-		for (String command : commands) {
-			if (!command.equals(commands[commands.length - 1]))
-				command = command.substring(0, command.length() - 1);
-			else {
-				if (command.length() > 4)
-					command = command.substring(0, 4);
-			}
-			String machineInstruction = Shell.assemblerToMachineInstruction(command);
-			instructions.add(machineInstruction);
-		}
+	    String content = Shell.memory.readFile(Shell.memory.getFile(name));
+	    String[] commands = content.split("\\n");
+	    for (String command : commands) {
+	        command = command.trim(); 
+	        if (command.isEmpty()) continue;
+	        String machineInstruction = Shell.assemblerToMachineInstruction(command);
+	        instructions.add(machineInstruction);
+	    }
 	}
+	
+	public boolean isValid() {
+    	return isValid;
+    }
+	
+
+
+
 }
 
