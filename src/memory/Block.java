@@ -8,8 +8,7 @@ public class Block {
     private final int address;
     private boolean occupied;
 
-    // 🔗 Dodato za ulančavanje slobodnih blokova
-    private Block nextFree;
+    private Block nextFree;  //ulancavanje slobodnog prostora
 
     public Block(int address) {
         this.address = address;
