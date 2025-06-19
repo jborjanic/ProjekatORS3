@@ -1,34 +1,35 @@
 package memory;
+
+
 import kernel.Process;   
 
-public class Ram {   // simulira glavnu memoriju
+public class Ram { 
     private static final int CAPACITY = 128;
-    private static final int PARTITION_SIZE = 16; // Velicina jedne particije
-    private static final int TOTAL_PARTITIONS = CAPACITY / PARTITION_SIZE; // Broj particija
+    private static final int PARTITION_SIZE = 16; 
+    private static final int TOTAL_PARTITIONS = CAPACITY / PARTITION_SIZE;
 
-    private static int[] ram = new int[CAPACITY];  // cijeli brojevi predstavljaju memorijske lokacije
-    private static PartitionMemory[] partitions = new PartitionMemory[TOTAL_PARTITIONS]; // Particije u RAM-u
+    private static int[] ram = new int[CAPACITY]; 
+    private static PartitionMemory[] partitions = new PartitionMemory[TOTAL_PARTITIONS]; 
 
     public static void initialize() {
-        for (int i = 0; i < CAPACITY; i++) {
+        for (int i = 0; i < CAPACITY; i++) 
             ram[i] = -1;
-        }
-        PartitionMemory.initialize(); // Inicijalizacija particija
     }
 
-    // Alocira memoriju procesom kroz fiksne particije
-    public static boolean allocateProcess(Process process) {
+   public static boolean allocateProcess(Process process) {
         PartitionMemory partition = PartitionMemory.allocatePartition(process);
         if (partition != null) {
             int start = partition.getStartAddress();
-            partitions[start / PARTITION_SIZE] = partition; // Dodeljujemo particiju u tabelu RAM-a
+            partitions[start / PARTITION_SIZE] = partition;
             loadPartitionIntoRam(partition);
             return true;
         }
-        return false; // Nema slobodnih particija
+        else {
+            System.out.println("null");
+            return false;
+        }
     }
-
-    // Upisuje podatke iz particije u RAM uz zaštitu adresnog prostora
+    
     private static void loadPartitionIntoRam(PartitionMemory partition) {
         int start = partition.getStartAddress();
         int end = start + PARTITION_SIZE;
@@ -39,7 +40,7 @@ public class Ram {   // simulira glavnu memoriju
             return;
         }
 
-        for (int i = 0; i < PARTITION_SIZE; i++) {
+        for (int i = 0; i < PARTITION_SIZE; i++) {  // Upisuje podatke iz particije u RAM
             if (i < data.length) {
                 ram[start + i] = data[i]; 
             } else {
@@ -48,7 +49,6 @@ public class Ram {   // simulira glavnu memoriju
         }
     }
 
-    // Čita podatke iz RAM-a po particiji uz zaštitu adresnog prostora
     public static int[] readPartition(PartitionMemory partition) {
         int start = partition.getStartAddress();
         int end = start + PARTITION_SIZE;
@@ -59,17 +59,16 @@ public class Ram {   // simulira glavnu memoriju
             return new int[0];
         }
 
-        for (int i = 0; i < PARTITION_SIZE; i++) {
+        for (int i = 0; i < PARTITION_SIZE; i++) {  // Cita podatke iz RAM-a po particiji
             data[i] = ram[start + i];
         }
         return data;
     }
 
-    // Provera da li je pristup memoriji validan
     private static boolean isValidMemoryAccess(int start, int end) {
         return start >= 0 && end <= CAPACITY;
     }
-
+    
     public static void printRAM() {
         System.out.println("RAM status:");
         for (int i = 0; i < TOTAL_PARTITIONS; i++) {
@@ -109,4 +108,23 @@ public class Ram {   // simulira glavnu memoriju
         }
         return ram[i];
     }
+    
+    public static void setAt(int i, int value) {
+        if (i < 0 || i >= CAPACITY) {
+            System.out.println("[ERROR] Memory access violation: Invalid write access.");
+            return;
+        }
+        ram[i] = value;
+    }
+    
+    public static boolean isOcupied(int i) {
+        if (i < 0 || i >= CAPACITY) {
+            System.out.println("[ERROR] Memory access violation: Invalid isOcupied check.");
+            return false;
+        }
+        return ram[i] != -1;  // ako je razlicito od -1, memorija je zauzeta
+    }
+
+
+   
 }
