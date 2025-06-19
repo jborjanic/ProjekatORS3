@@ -7,7 +7,7 @@ public class SecondaryMemory {
     private static Block[] blocks;
     private static int numberOfBlocks;
     public static ArrayList<FileInMemory> files;
-    private Block freeListHead;  // glava ulančanog slobodnog prostora
+    private Block freeListHead;  // glava ulancanog slobodnog prostora
 
     public SecondaryMemory() {
         size = 2048;
@@ -16,8 +16,8 @@ public class SecondaryMemory {
         for (int i = 0; i < numberOfBlocks; i++) {
             blocks[i] = new Block(i);
         }
-        // Ulančavanje slobodnih blokova
-        for (int i = 0; i < numberOfBlocks - 1; i++) {
+      
+        for (int i = 0; i < numberOfBlocks - 1; i++) { // ulancavanje slobodnog prostora
             blocks[i].setNextFree(blocks[i + 1]);
         }
         blocks[numberOfBlocks - 1].setNextFree(null);
@@ -36,8 +36,7 @@ public class SecondaryMemory {
             int count = 0;
             Block temp = current;
 
-            // Proveravamo kontinualni niz slobodnih blokova
-            while (temp != null && !temp.isOccupied() &&
+            while (temp != null && !temp.isOccupied() &&     // neprekidni niz slobodnih blokova; da ne predjemo kraj liste
                    temp.getAddress() == current.getAddress() + count &&
                    count < requiredBlocks) {
                 count++;
@@ -48,12 +47,11 @@ public class SecondaryMemory {
                 int startIndex = current.getAddress();
 
                 for (int i = startIndex, blockIndex = 0; blockIndex < requiredBlocks; i++, blockIndex++) {
-                    blocks[i].writeContent(file.part(blockIndex));
+                    blocks[i].writeContent(file.part(blockIndex));  // pise sadrzaj fajla u blokove
                     blocks[i].setOccupied(true);
-                    blocks[i].setNextFree(null); // više nije u lancu slobodnih
+                    blocks[i].setNextFree(null); 
                 }
 
-                // Ažuriranje slobodnog lanca
                 if (prev == null) {
                     freeListHead = temp;
                 } else {
@@ -73,7 +71,7 @@ public class SecondaryMemory {
         System.out.println("Not enough continuous space to save the file.");
     }
 
-    public void deleteFile(FileInMemory file) {
+    public void deleteFile(FileInMemory file) {  // vracanje blokova u lanac slobodnih blokova
         if (!files.contains(file)) {
             System.out.println("File not found in memory.");
             return;
@@ -82,7 +80,6 @@ public class SecondaryMemory {
         int startBlock = file.getStartBlock();
         int length = file.getLength();
 
-        // Oslobađanje blokova i vraćanje u lanac slobodnog prostora
         for (int i = startBlock + length - 1; i >= startBlock; i--) {
             blocks[i].clear();
             blocks[i].setNextFree(freeListHead);
@@ -95,7 +92,6 @@ public class SecondaryMemory {
     public String readFile(FileInMemory file) {
         if (!files.contains(file)) 
             return "File not found.";
-
         StringBuilder read = new StringBuilder();
         int startBlock = file.getStartBlock();
         int length = file.getLength();
@@ -106,7 +102,6 @@ public class SecondaryMemory {
                 read.append((char) b);
             }
         }
-
         return read.toString();
     }
 
@@ -114,12 +109,13 @@ public class SecondaryMemory {
         String line = "--------------------------------------------------";
         System.out.println("Memory Allocation Table:");
         System.out.println(line);
-        System.out.println("File Name\tStart Block\tLength");
+        System.out.printf("%-20s %-15s %-10s%n", "File Name", "Start Block", "Length");
         System.out.println(line);
         for (FileInMemory file : files) {
-            System.out.println(file.getName() + "\t" + file.getStartBlock() + "\t" + file.getLength());
+            System.out.printf("%-20s %-15d %-10d%n", file.getName(), file.getStartBlock(), file.getLength());
         }
     }
+
 
     public boolean contains(String fileName) {
         for (FileInMemory f : files) {
