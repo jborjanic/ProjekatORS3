@@ -10,7 +10,6 @@ public class Commands {
     private static String command;  
     private static ArrayList<String> commandList = new ArrayList<>();
     private static int iter;  //broj unijetih komandi do sada
-    private static PrintStream outStream;
 
     public static void returnCommand() {
         commandList.add(command);
@@ -25,7 +24,7 @@ public class Commands {
                     Exe.ls();
                 } else errorWithParameters();
                 break;
-
+            
             case "cd":
                 if (commands.length == 2) {
                     Exe.cd(commands[1]);
