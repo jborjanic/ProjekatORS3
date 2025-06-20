@@ -1,6 +1,7 @@
 package asembler;
 import shell.Shell;
 import kernel.ProcessState;
+import memory.Ram;
 
 
 public class Operations {
@@ -19,70 +20,77 @@ public class Operations {
     public static final String inc = "1111";
 
 
-    public static Register ACC = new Register("ACC", "1100", 0);
-
-    public static Register R1 = new Register("R1", Constants.R1, 0);
-    public static Register R2 = new Register("R2", Constants.R2, 0);
-    public static Register R3 = new Register("R3", Constants.R3, 0);
-    public static Register R4 = new Register("R4", Constants.R4, 0);
+    public static Register ACC = new Register("ACC", "1100", 0);    
 
     public static void load(String operand) {
-        Register r = getRegister(operand);
-        if (r != null) {
-            ACC.value = r.value;  
-        } else if (operand.length() == 8) {
-            ACC.value = Integer.parseInt(operand, 2);  
+        try {
+            int address = Integer.parseInt(operand, 2);  
+            int value = Ram.getAt(address);             
+            ACC.value = value;
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
         }
     }
 
-    public static void store(String reg) {
-        Register r = getRegister(reg);
-        if (r != null) {
-            r.value = ACC.value;
-        }
-    }
-
-
+   
     public static void add(String operand) {
-        Register r = getRegister(operand);
-        if (r != null) {
-            ACC.value += r.value;
-        } else if (operand.length() == 8) {
-            ACC.value += Integer.parseInt(operand, 2);
+        try {
+            int address = Integer.parseInt(operand, 2);  
+            int value = Ram.getAt(address);            
+            ACC.value += value;
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
         }
     }
-
-    public static void sub(String operand) {
-        Register r = getRegister(operand);
-        if (r != null) {
-            ACC.value -= r.value;
-        } else if (operand.length() == 8) {
-            ACC.value -= Integer.parseInt(operand, 2);
-        }
-    }
-
+    
     public static void mul(String operand) {
-        Register r = getRegister(operand);
-        if (r != null) {
-            ACC.value *= r.value;
-        } else if (operand.length() == 8) {
-            ACC.value *= Integer.parseInt(operand, 2);
+        try {
+            int address = Integer.parseInt(operand, 2); 
+            int value = Ram.getAt(address);              
+            ACC.value *= value;
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
+        }
+    }
+
+
+    public static void store(String operand) {
+        try {
+            int address = Integer.parseInt(operand, 2); 
+            Ram.setAt(address, ACC.value);               
+            System.out.println("[DEBUG] Stored ACC value " + ACC.value + " at RAM[" + address + "]");
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
+        }
+    }
+
+    public static void hlt() {
+    	Shell.currentlyExecuting.setState(ProcessState.DONE);
+    	
+    }
+    
+    public static void sub(String operand) {
+        try {
+            int address = Integer.parseInt(operand, 2);  
+            int value = Ram.getAt(address);
+            ACC.value -= value;
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
         }
     }
 
     public static void div(String operand) {
-        Register r = getRegister(operand);
-        if (r != null && r.value != 0) {
-            ACC.value /= r.value;
-        } else if (operand.length() == 8) {
-            int val = Integer.parseInt(operand, 2);
-            if (val != 0) ACC.value /= val;
+        try {
+            int address = Integer.parseInt(operand, 2);
+            int value = Ram.getAt(address);
+            if (value != 0) {
+                ACC.value /= value;
+            } else {
+                System.out.println("[ERROR] Division by zero attempted.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary address: " + operand);
         }
-    }
-    
-    public static void hlt() {
-    	Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
-    	
     }
 
     public static void inc() {
@@ -92,77 +100,59 @@ public class Operations {
     public static void dec() {
         ACC.value--;
     }
-    
-    public static void hlt() {
-		Shell.currentlyExecuting.setState(ProcessState.DONE);
-	}
-    
-    public static void jmp(String adr) {
-        int target = Integer.parseInt(adr, 2);
-        if (target >= Shell.limit) {
-            Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
-            System.out.println("Invalid jump address in process: " + Shell.currentlyExecuting.getName());
-            return;
-        }
-        Shell.PC = target;
-    }
 
-    public static void jmpe(String adr) {
-        // Skok ako je ACC == 0
-        if (ACC.value == 0) {
+    public static void jmp(String adr) {
+        try {
             int target = Integer.parseInt(adr, 2);
             if (target >= Shell.limit) {
                 Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
-                System.out.println("Invalid jmpe address in process: " + Shell.currentlyExecuting.getName());
+                System.out.println("[ERROR] Invalid jump address: " + target);
                 return;
             }
             Shell.PC = target;
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid binary jump address: " + adr);
+        }
+    }
+
+    public static void jmpe(String adr) {
+        if (ACC.value == 0) {
+            try {
+                int target = Integer.parseInt(adr, 2);
+                if (target >= Shell.limit) {
+                    Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+                    System.out.println("[ERROR] Invalid jmpe address: " + target);
+                    return;
+                }
+                Shell.PC = target;
+            } catch (NumberFormatException e) {
+                System.out.println("[ERROR] Invalid binary jmpe address: " + adr);
+            }
         }
     }
 
     public static void jmpd(String adr) {
-        // Skok ako ACC != 0
         if (ACC.value != 0) {
-            int target = Integer.parseInt(adr, 2);
-            if (target >= Shell.limit) {
-                Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
-                System.out.println("Invalid jmpd address in process: " + Shell.currentlyExecuting.getName());
-                return;
+            try {
+                int target = Integer.parseInt(adr, 2);
+                if (target >= Shell.limit) {
+                    Shell.currentlyExecuting.setState(ProcessState.TERMINATED);
+                    System.out.println("[ERROR] Invalid jmpd address: " + target);
+                    return;
+                }
+                Shell.PC = target;
+            } catch (NumberFormatException e) {
+                System.out.println("[ERROR] Invalid binary jmpd address: " + adr);
             }
-            Shell.PC = target;
         }
     }
-
 
     public static void clearRegisters() {
-        R1.value = 0;
-        R2.value = 0;
-        R3.value = 0;
-        R4.value = 0;
         ACC.value = 0;
-    }
-
-    private static Register getRegister(String address) {
-        switch (address) {
-            case Constants.R1:
-                return R1;
-            case Constants.R2:
-                return R2;
-            case Constants.R3:
-                return R3;
-            case Constants.R4:
-                return R4;
-            default:
-                return null;
-        }
-    }
-
+    }    
+ 
     public static void printRegisters() {
         System.out.println(" \n *********** REGISTERS *********** ");
         System.out.println("ACC value : [ " + ACC.value + " ]");
-        System.out.println("R1 value : [ " + R1.value + " ]");
-        System.out.println("R2 value : [ " + R2.value + " ]");
-        System.out.println("R3 value : [ " + R3.value + " ]");
-        System.out.println("R4 value : [ " + R4.value + " ]");
     }
 }
