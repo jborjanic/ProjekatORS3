@@ -1,7 +1,6 @@
 package shell;
 
 import java.io.File;
-import asembler.Constants;
 import asembler.Operations;
 import fileSystem.FileSystem;
 import kernel.ProcessScheduler;
@@ -69,19 +68,23 @@ public class Shell {
         }
 
         if (!programCounterChanged) PC++;
+        System.out.println("PC: " + PC + ", IR: " + IR);
+
     }
 
     public static String assemblerToMachineInstruction(String line) {
+    	if (line == null || line.trim().isEmpty()) {
+            return ""; 
+        } 
         String[] command = line.split("[ ,]+");
         String instruction = "";
-
         switch (command[0]) {
             case "HLT":
                 return Operations.hlt;
             case "LOAD":
                 instruction += Operations.load + toBinary(command[1]);
                 break;
-            case "STORE":
+           case "STORE":
                 instruction += Operations.store + toBinary(command[1]);
                 break;
             case "ADD":
@@ -115,16 +118,17 @@ public class Shell {
 
         return instruction;
     }
-
-    public static String toBinary(String s) {
-        int number = Integer.parseInt(s);
-        String bin = Integer.toBinaryString(number);
-        while (bin.length() < 8) {
-            bin = "0" + bin;
+    
+   public static String toBinary(String operand) {
+        int value;
+        if (operand.startsWith("R")) {
+            value = Integer.parseInt(operand.substring(1));
+        } else {
+            value = Integer.parseInt(operand);
         }
-        return bin;
+        return String.format("%8s", Integer.toBinaryString(value)).replace(' ', '0');
     }
-
+  
     public static String fromIntToInstruction(int val) {
         String inst = Integer.toBinaryString(val);
         while (inst.length() < 12) {
@@ -134,20 +138,13 @@ public class Shell {
     }
 
     public static void saveValues() {
-        int[] registers = {
-            Operations.R1.value, Operations.R2.value,
-            Operations.R3.value, Operations.R4.value
-        };
-        currentlyExecuting.setValuesOfRegisters(registers);
         currentlyExecuting.setPcValue(PC);
+        currentlyExecuting.setAccValue(Operations.ACC.value); 
     }
 
     public static void loadValues() {
-        int[] registers = currentlyExecuting.getValuesOfRegisters();
-        Operations.R1.value = registers[0];
-        Operations.R2.value = registers[1];
-        Operations.R3.value = registers[2];
-        Operations.R4.value = registers[3];
         PC = currentlyExecuting.getPcValue();
+        
+        Operations.ACC.value = currentlyExecuting.getAccValue(); 
     }
 }
