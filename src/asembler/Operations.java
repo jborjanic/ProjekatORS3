@@ -25,18 +25,21 @@ public class Operations {
     public static void load(String operand) {
         try {
             int address = Integer.parseInt(operand, 2);  
-            int value = Ram.getAt(address);             
+            int realAddress = Shell.base + address; 
+            int value = Ram.getAt(realAddress);             
             ACC.value = value;
+            System.out.println("[DEBUG] Loaded value " + value + " from RAM[" + realAddress + "]");
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid binary address: " + operand);
         }
     }
-
    
     public static void add(String operand) {
         try {
-            int address = Integer.parseInt(operand, 2);  
-            int value = Ram.getAt(address);            
+            int address = Integer.parseInt(operand, 2);
+            int realAddress = Shell.base + address;
+
+            int value = Ram.getAt(realAddress);
             ACC.value += value;
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid binary address: " + operand);
@@ -46,19 +49,22 @@ public class Operations {
     public static void mul(String operand) {
         try {
             int address = Integer.parseInt(operand, 2); 
-            int value = Ram.getAt(address);              
+            int realAddress = Shell.base + address;
+
+            int value = Ram.getAt(realAddress);              
             ACC.value *= value;
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid binary address: " + operand);
         }
     }
 
-
     public static void store(String operand) {
         try {
             int address = Integer.parseInt(operand, 2); 
-            Ram.setAt(address, ACC.value);               
-            System.out.println("[DEBUG] Stored ACC value " + ACC.value + " at RAM[" + address + "]");
+            int realAddress = Shell.base + address;
+
+            Ram.setAt(realAddress, ACC.value);
+            System.out.println("[DEBUG] Stored ACC value " + ACC.value + " at RAM[" + realAddress + "]");
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid binary address: " + operand);
         }
@@ -72,7 +78,9 @@ public class Operations {
     public static void sub(String operand) {
         try {
             int address = Integer.parseInt(operand, 2);  
-            int value = Ram.getAt(address);
+            int realAddress = Shell.base + address;
+
+            int value = Ram.getAt(realAddress);
             ACC.value -= value;
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid binary address: " + operand);
@@ -82,7 +90,9 @@ public class Operations {
     public static void div(String operand) {
         try {
             int address = Integer.parseInt(operand, 2);
-            int value = Ram.getAt(address);
+            int realAddress = Shell.base + address;
+
+            int value = Ram.getAt(realAddress);
             if (value != 0) {
                 ACC.value /= value;
             } else {
