@@ -147,7 +147,7 @@ public class FileSystem {
 		}
 	}
 
-	public File getCurrentFolder() {
+	public static File getCurrentFolder() {
 		return currentFolder;
 	}
 }
