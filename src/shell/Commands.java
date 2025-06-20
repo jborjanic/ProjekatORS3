@@ -59,6 +59,24 @@ public class Commands {
                 } else errorWithParameters();
                 break;
 
+            case "mkdir":
+                if (commands.length == 2) {
+                    Exe.mkdir(commands[1]);
+                } else errorWithParameters();
+                break;
+                
+            case "rm":
+                if (commands.length == 2) {
+                    Exe.rm(commands[1]);
+                } else errorWithParameters();
+                break;
+                
+            case "exit":
+                if (commands.length == 1) {
+                    Exe.exit();
+                } else errorWithParameters();
+                break;
+
             case "help":
                 if (commands.length == 1) {
                     Exe.help();
