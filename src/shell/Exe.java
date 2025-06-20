@@ -3,7 +3,11 @@ package shell;
 import kernel.ProcessScheduler;
 import kernel.Process;
 import memory.MemoryManager;
+
+import java.io.File;
+
 import fileSystem.FileSystem;
+import javafx.scene.control.TreeItem;
 
 public class Exe {
     private static final MemoryManager memoryManager = new MemoryManager();
@@ -64,6 +68,40 @@ public class Exe {
             System.out.println("Invalid PID format.");
         }
     }
+    
+    public static void mkdir(String name) {
+        File folder = new File(FileSystem.getCurrentFolder().getAbsolutePath() + "\\" + name);
+        if (folder.exists() && folder.isDirectory()) {
+            System.out.println("Directory '" + name + "' already exists.");
+        } else {
+            FileSystem.makeDirectory(name);
+            System.out.println("Directory '" + name + "' created.");
+        }
+    }
+
+    public static void rm(String name) {
+        for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+            if (file.getValue().getName().equals(name)) {
+                if (file.getValue().isDirectory()) {
+                    if (file.getValue().delete()) {
+                        System.out.println("Directory '" + name + "' deleted.");
+                    } else {
+                        System.out.println("Failed to delete directory '" + name + "'.");
+                    }
+                } else {
+                    FileSystem.deleteFile(name);
+                    System.out.println("File '" + name + "' deleted.");
+                }
+                return;
+            }
+        }
+        System.out.println("File or directory '" + name + "' not found.");
+    }
+    
+    public static void exit() {
+        System.out.println("Exiting OS emulator...");
+        System.exit(0);
+    }
 
     public static void help() {
         System.out.println("""
@@ -74,6 +112,9 @@ public class Exe {
             EXE - Start Round Robin process scheduling
             PR - List of processes
             TRM <PID> - Terminate process
+            MKDIR <name> - Create a new directory
+            RM <name> - Delete file or directory
+            EXIT - Exit the OS emulator
             HELP - Show available commands
         """);
     }
