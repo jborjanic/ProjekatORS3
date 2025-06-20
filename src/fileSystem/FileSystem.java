@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import asembler.Operations;
 import javafx.scene.control.TreeItem;
 import kernel.Process;
 import memory.FileInMemory;
@@ -52,35 +51,52 @@ public class FileSystem {
 		createTree(treeItem);
 		return treeItem;
 	}
-
+	
 	public static void listFiles() {
-		System.out.println("Content of: " + currentFolder.getName());
-		System.out.println("Type\tName\t\t\tSize");
-		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-			byte[] fileContent = null;
-			try {
-				if (!file.getValue().isDirectory())
-					fileContent = Files.readAllBytes(file.getValue().toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			System.out.println(file.getValue().isDirectory() ? ("Folder \t" + file.getValue().getName())
-					: ("File" + "\t" + file.getValue().getName()
-							+ (file.getValue().getName().length() < 16 ? "\t\t" + fileContent.length + " B"
-									: "\t" + fileContent.length + " B")));
-		}
+	    System.out.println("Content of: " + currentFolder.getName());
+	    System.out.printf("%-8s %-24s %8s%n", "Type", "Name", "Size");
+	    for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+	        byte[] fileContent = null;
+	        try {
+	            if (!file.getValue().isDirectory()) {
+	                fileContent = Files.readAllBytes(file.getValue().toPath());
+	            }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+
+	        if (file.getValue().isDirectory()) {
+	            System.out.printf("%-8s %-24s %8s%n", "Folder", file.getValue().getName(), "");
+	        } else {
+	            System.out.printf("%-8s %-24s %8s%n", "File", file.getValue().getName(), fileContent.length + " B");
+	        }
+	    }
 	}
 
 	public static void changeDirectory(String directory) {
-		if (directory.equals("..") && !currentFolder.equals(rootFolder))
-			currentFolder = currentFolder.getParentFile();
-		else {
-			for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-				if (file.getValue().getName().equals(directory) && file.getValue().isDirectory())
-					currentFolder = file.getValue();
-			}
-		}
+	    if (directory.equals("..")) {
+	        if (!currentFolder.equals(rootFolder)) {
+	            currentFolder = currentFolder.getParentFile();
+	            System.out.println("Moved to: " + currentFolder.getName());
+	        } else {
+	            System.out.println("Already at the root directory.");
+	        }
+	    } else {
+	        boolean found = false;
+	        for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
+	            if (file.getValue().getName().equals(directory) && file.getValue().isDirectory()) {
+	                currentFolder = file.getValue();
+	                System.out.println("Moved to: " + currentFolder.getName());
+	                found = true;
+	                break;
+	            }
+	        }
+	        if (!found) {
+	            System.out.println("Directory '" + directory + "' not found.");
+	        }
+	    }
 	}
+
 
 	public static void makeDirectory(String directory) {
 		File folder = new File(currentFolder.getAbsolutePath() + "\\" + directory);
@@ -103,18 +119,23 @@ public class FileSystem {
 		}
 	}
 
-	public static void createFile(Process process) {
-		String name = process.getName().substring(0, process.getName().indexOf('.')) + "_output";
-		File newFile = new File(process.getFilePath().getParent() + "\\" + name + ".txt");
-		try {
-			newFile.createNewFile();
-			FileWriter fw = new FileWriter(newFile);
-			fw.write("Rezultat izvrsavanja: " + Operations.R4.value);
-			fw.close();
-		} catch (IOException e) {
-			System.out.println("Error while creating file");
-		}
+
+	
+	public static void createFile(Process process, int result) {
+	    String name = process.getName().substring(0, process.getName().indexOf('.')) + "_output";
+	    File newFile = new File(process.getFilePath().getParent() + "\\" + name + ".txt");
+
+	    try {
+	        // Ova verzija uvek kreira fajl ako ne postoji i prepisuje ako postoji
+	        FileWriter fw = new FileWriter(newFile, false); // false znaci ne dodavati, nego prepisati
+	        fw.write("Rezultat izvrsavanja: " + result);
+	        fw.close();
+	    } catch (IOException e) {
+	        System.out.println("Error while creating file: " + e.getMessage());
+	    }
 	}
+
+
 
 	public static void deleteFile(String name) {
 		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
