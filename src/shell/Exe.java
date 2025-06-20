@@ -19,19 +19,24 @@ public class Exe {
     public static void mem() {
         MemoryManager.printMemory();
     }
-
+   
     public static void load(String par) {
         try {
             Process process = new Process(par);
+            if (!process.isValid()) {
+                System.out.println("Process " + par + " was not loaded because the program does not exist.");
+                return;
+            }
             int startAddr = memoryManager.loadProcess(process);
             if (startAddr >= 0) {
-                System.out.println("Process loaded at address " + startAddr);
+                System.out.println("Process loaded at address " + startAddr + ".");
             } else {
                 System.out.println("Failed to load process.");
             }
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
+        	e.printStackTrace();
             System.out.println("Unknown error during process loading.");
         }
     }
