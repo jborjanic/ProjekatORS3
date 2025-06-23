@@ -68,7 +68,6 @@ public class Shell {
         }
 
         if (!programCounterChanged) PC++;
-        System.out.println("PC: " + PC + ", IR: " + IR);
 
     }
 
