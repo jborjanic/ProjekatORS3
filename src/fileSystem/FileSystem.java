@@ -55,20 +55,20 @@ public class FileSystem {
 	public static void listFiles() {
 	    System.out.println("Content of: " + currentFolder.getName());
 	    System.out.printf("%-8s %-24s %8s%n", "Type", "Name", "Size");
-	    for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-	        byte[] fileContent = null;
-	        try {
-	            if (!file.getValue().isDirectory()) {
-	                fileContent = Files.readAllBytes(file.getValue().toPath());
-	            }
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
 
-	        if (file.getValue().isDirectory()) {
-	            System.out.printf("%-8s %-24s %8s%n", "Folder", file.getValue().getName(), "");
-	        } else {
-	            System.out.printf("%-8s %-24s %8s%n", "File", file.getValue().getName(), fileContent.length + " B");
+	    File[] files = currentFolder.listFiles();
+	    if (files != null) {
+	        for (File file : files) {
+	            if (file.isDirectory()) {
+	                System.out.printf("%-8s %-24s %8s%n", "Folder", file.getName(), "");
+	            } else {
+	                try {
+	                    byte[] fileContent = Files.readAllBytes(file.toPath());
+	                    System.out.printf("%-8s %-24s %8s%n", "File", file.getName(), fileContent.length + " B");
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                }
+	            }
 	        }
 	    }
 	}
@@ -83,20 +83,23 @@ public class FileSystem {
 	        }
 	    } else {
 	        boolean found = false;
-	        for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-	            if (file.getValue().getName().equals(directory) && file.getValue().isDirectory()) {
-	                currentFolder = file.getValue();
-	                System.out.println("Moved to: " + currentFolder.getName());
-	                found = true;
-	                break;
+	        File[] files = currentFolder.listFiles();
+	        if (files != null) {
+	            for (File file : files) {
+	                if (file.getName().equals(directory) && file.isDirectory()) {
+	                    currentFolder = file;
+	                    System.out.println("Moved to: " + currentFolder.getName());
+	                    found = true;
+	                    break;
+	                }
 	            }
 	        }
+
 	        if (!found) {
 	            System.out.println("Directory '" + directory + "' not found.");
 	        }
 	    }
 	}
-
 
 	public static void makeDirectory(String directory) {
 		File folder = new File(currentFolder.getAbsolutePath() + "\\" + directory);
@@ -106,20 +109,27 @@ public class FileSystem {
 	}
 
 	public static void deleteDirectory(String directory) {
-		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-			if (file.getValue().getName().equals(directory) && file.getValue().isDirectory())
-				file.getValue().delete();
-		}
+	    File[] files = currentFolder.listFiles();
+	    if (files != null) {
+	        for (File file : files) {
+	            if (file.getName().equals(directory) && file.isDirectory()) {
+	                file.delete();
+	            }
+	        }
+	    }
 	}
 
 	public static void renameDirectory(String old, String newName) {
-		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-			if (file.getValue().getName().equals(old) && file.getValue().isDirectory())
-				file.getValue().renameTo(new File(currentFolder.getAbsolutePath() + "\\" + newName));
-		}
+	    File[] files = currentFolder.listFiles();
+	    if (files != null) {
+	        for (File file : files) {
+	            if (file.getName().equals(old) && file.isDirectory()) {
+	                File newFile = new File(currentFolder, newName);
+	                file.renameTo(newFile);
+	            }
+	        }
+	    }
 	}
-
-
 	
 	public static void createFile(Process process, int result) {
 	    String name = process.getName().substring(0, process.getName().indexOf('.')) + "_output";
@@ -138,13 +148,17 @@ public class FileSystem {
 
 
 	public static void deleteFile(String name) {
-		for (TreeItem<File> file : Shell.tree.getTreeItem().getChildren()) {
-			if (file.getValue().getName().equals(name) && !file.getValue().isDirectory())
-				file.getValue().delete();
-			if (Shell.memory.contains(name)) {
-				Shell.memory.deleteFile(Shell.memory.getFile(name));
-			}
-		}
+	    File[] files = currentFolder.listFiles();
+	    if (files != null) {
+	        for (File file : files) {
+	            if (file.getName().equals(name) && !file.isDirectory()) {
+	                file.delete();
+	                if (Shell.memory.contains(name)) {
+	                    Shell.memory.deleteFile(Shell.memory.getFile(name));
+	                }
+	            }
+	        }
+	    }
 	}
 
 	public static File getCurrentFolder() {
