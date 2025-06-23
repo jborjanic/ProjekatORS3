@@ -38,12 +38,23 @@ public class GUI extends Application {
 		bottom.clear();
 	}
 
-	private void addTextToTop() {
+	/*private void addTextToTop() {
 		if (outStringBuilder.length() > 0) {
 			top.appendText(outStringBuilder.toString());
 			outStringBuilder = new StringBuilder();
 		}
+	}*/
+	
+	private void addTextToTop() {
+		if (outStringBuilder.length() > 0) {
+			String output = outStringBuilder.toString();
+			outStringBuilder = new StringBuilder();
+			javafx.application.Platform.runLater(() -> {
+				top.appendText(output);
+			});
+		}
 	}
+
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
