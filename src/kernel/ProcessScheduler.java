@@ -64,7 +64,7 @@ public class ProcessScheduler extends Thread {
 	        Shell.executeMachineInstruction();
 	    }
 	    try {
-	        Thread.sleep(500);
+	        Thread.sleep(3000);
 	    } catch (InterruptedException e) {
 	        System.out.println("Error with thread");
 	    }
@@ -77,7 +77,7 @@ public class ProcessScheduler extends Thread {
 	        Operations.clearRegisters();
 	    } else if (process.getState() == ProcessState.DONE) {
 	        System.out.println("Process " + process.getName() + " is done");
-	        //int result = Ram.getAt(process.getStartAdress() + 3); 
+	        //int result = Ram.getAt(process.getStartAddress() + 3); 
 	        int result = Ram.getAt(3); 
 	        FileSystem.createFile(process, result);
 	        MemoryManager.removeProcess(process);
